@@ -1,0 +1,11 @@
+{
+  "id": "com.material.launcher",
+  "version": "1.0.0",
+  "vendor": "Personal",
+  "type": "web",
+  "main": "index.html",
+  "title": "Home",
+  "icon": "icon.png",
+  "resolution": "1920x1080",
+  "disableBackHistoryAPI": true
+}

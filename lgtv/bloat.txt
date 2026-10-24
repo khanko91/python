@@ -1,0 +1,16 @@
+# Suggested removals. App ids vary by model, region and firmware, so run
+#   python lgtv/debloat.py --host <tv-ip> apps
+# first and edit this list to match what your TV actually has.
+# Delete any line for an app you use.
+
+com.webos.app.lgchannels        # LG Channels (ad-supported free TV)
+com.webos.app.sportsapp         # Sports Portal
+com.webos.app.gallery           # Gallery / art screensaver content
+com.webos.app.shoppingtv        # Shopping
+com.webos.app.facebookwatch
+amazon.alexa.view
+com.apple.appletv
+com.disney.disneyplus-prod
+com.rakuten.tv
+com.tubitv.app
+com.pluto.tv

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Home</title>
+<style>
+  /* Material 3 dark scheme, baseline purple seed */
+  :root {
+    --md-primary: #d0bcff;
+    --md-on-primary: #381e72;
+    --md-primary-container: #4f378b;
+    --md-on-primary-container: #eaddff;
+    --md-surface: #141218;
+    --md-surface-container: #211f26;
+    --md-surface-container-high: #2b2930;
+    --md-on-surface: #e6e0e9;
+    --md-on-surface-variant: #cac4d0;
+    --md-outline: #938f99;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html, body {
+    width: 1920px; height: 1080px; overflow: hidden;
+    background: var(--md-surface); color: var(--md-on-surface);
+    font-family: "Roboto", "LG Smart UI", "Helvetica Neue", Arial, sans-serif;
+  }
+  header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 96px 120px 48px;
+  }
+  .greeting { font-size: 57px; line-height: 64px; font-weight: 400; }
+  .date { font-size: 22px; color: var(--md-on-surface-variant); margin-top: 8px; }
+  .clock { font-size: 88px; font-weight: 300; color: var(--md-primary); }
+  h2 {
+    font-size: 24px; font-weight: 500; letter-spacing: .1px;
+    color: var(--md-on-surface-variant); padding: 0 120px 20px;
+  }
+  .row {
+    display: flex; gap: 24px; padding: 0 120px 56px;
+    transition: transform 200ms cubic-bezier(.2, 0, 0, 1);
+  }
+  .card {
+    flex: 0 0 auto; width: 248px; height: 200px; border-radius: 28px;
+    background: var(--md-surface-container); outline: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    transition: transform 200ms cubic-bezier(.2, 0, 0, 1), background 200ms, box-shadow 200ms;
+  }
+  .card img { width: 96px; height: 96px; border-radius: 20px; object-fit: contain; }
+  .card .initial {
+    width: 96px; height: 96px; border-radius: 20px; display: grid; place-items: center;
+    background: var(--md-primary-container); color: var(--md-on-primary-container); font-size: 44px;
+  }
+  .card span {
+    font-size: 20px; max-width: 216px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .card:focus {
+    background: var(--md-primary); color: var(--md-on-primary); transform: scale(1.08);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+  }
+  .chip {
+    flex: 0 0 auto; height: 64px; padding: 0 32px; border-radius: 16px; outline: none;
+    border: 2px solid var(--md-outline); display: flex; align-items: center;
+    font-size: 22px; font-weight: 500; color: var(--md-on-surface-variant);
+    transition: background 200ms, color 200ms, transform 200ms;
+  }
+  .chip:focus {
+    background: var(--md-primary-container); border-color: var(--md-primary-container);
+    color: var(--md-on-primary-container); transform: scale(1.06);
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <div class="greeting" id="greeting">Hello</div>
+    <div class="date" id="date"></div>
+  </div>
+  <div class="clock" id="clock"></div>
+</header>
+
+<h2>Apps</h2>
+<div class="row" id="apps"></div>
+
+<h2>Inputs</h2>
+<div class="row" id="inputs"></div>
+
+<script>
+  // Used when the TV refuses to list launch points.
+  var FALLBACK_APPS = [
+    { id: "netflix", title: "Netflix" },
+    { id: "youtube.leanback.v4", title: "YouTube" },
+    { id: "com.webos.app.livetv", title: "Live TV" },
+    { id: "com.webos.app.settings", title: "Settings" }
+  ];
+  var INPUTS = [
+    { id: "com.webos.app.hdmi1", title: "HDMI 1" },
+    { id: "com.webos.app.hdmi2", title: "HDMI 2" },
+    { id: "com.webos.app.hdmi3", title: "HDMI 3" },
+    { id: "com.webos.app.hdmi4", title: "HDMI 4" },
+    { id: "com.webos.app.livetv", title: "Live TV" },
+    { id: "com.webos.app.settings", title: "Settings" }
+  ];
+  var HIDDEN = ["com.material.launcher", "com.webos.app.home"];
+
+  function luna(uri, params, onSuccess, onFailure) {
+    if (typeof PalmServiceBridge === "undefined") { onFailure && onFailure(); return; }
+    var bridge = new PalmServiceBridge();
+    bridge.onservicecallback = function (msg) {
+      var res = JSON.parse(msg);
+      if (res.returnValue === false) { onFailure && onFailure(res); } else { onSuccess && onSuccess(res); }
+    };
+    bridge.call(uri, JSON.stringify(params || {}));
+  }
+
+  function launch(id) {
+    luna("luna://com.webos.service.applicationmanager/launch", { id: id });
+  }
+
+  function makeCard(app) {
+    var el = document.createElement("div");
+    el.className = "card";
+    el.tabIndex = 0;
+    el.dataset.id = app.id;
+    if (app.icon) {
+      var img = document.createElement("img");
+      img.src = app.icon;
+      el.appendChild(img);
+    } else {
+      var initial = document.createElement("div");
+      initial.className = "initial";
+      initial.textContent = app.title.charAt(0);
+      el.appendChild(initial);
+    }
+    var label = document.createElement("span");
+    label.textContent = app.title;
+    el.appendChild(label);
+    return el;
+  }
+
+  function makeChip(input) {
+    var el = document.createElement("div");
+    el.className = "chip";
+    el.tabIndex = 0;
+    el.dataset.id = input.id;
+    el.textContent = input.title;
+    return el;
+  }
+
+  function render(apps) {
+    var appRow = document.getElementById("apps");
+    var inputRow = document.getElementById("inputs");
+    appRow.innerHTML = "";
+    inputRow.innerHTML = "";
+    apps.filter(function (a) { return HIDDEN.indexOf(a.id) < 0; })
+        .forEach(function (a) { appRow.appendChild(makeCard(a)); });
+    INPUTS.forEach(function (i) { inputRow.appendChild(makeChip(i)); });
+    var first = appRow.firstChild || inputRow.firstChild;
+    if (first) first.focus();
+  }
+
+  function loadApps() {
+    luna("luna://com.webos.applicationManager/listLaunchPoints", {}, function (res) {
+      var points = (res.launchPoints || []).map(function (p) {
+        return { id: p.id, title: p.title, icon: p.largeIcon || p.icon };
+      });
+      render(points.length ? points : FALLBACK_APPS);
+    }, function () { render(FALLBACK_APPS); });
+  }
+
+  // D-pad navigation: left/right within a row, up/down between rows,
+  // keeping roughly the same horizontal position.
+  function rows() { return [document.getElementById("apps"), document.getElementById("inputs")]; }
+
+  function scrollRow(row, item) {
+    var offset = Math.max(0, item.offsetLeft - 120 - 1920 / 2 + item.offsetWidth / 2);
+    var max = Math.max(0, row.scrollWidth - 1920);
+    row.style.transform = "translateX(" + -Math.min(offset, max) + "px)";
+  }
+
+  document.addEventListener("keydown", function (e) {
+    var current = document.activeElement;
+    var all = rows();
+    var rowIndex = all.indexOf(current && current.parentNode);
+    if (rowIndex < 0) { var f = all[0].firstChild || all[1].firstChild; if (f) f.focus(); return; }
+    var row = all[rowIndex];
+    var items = Array.prototype.slice.call(row.children);
+    var i = items.indexOf(current);
+    var target = null;
+
+    switch (e.keyCode) {
+      case 37: target = items[i - 1]; break;               // left
+      case 39: target = items[i + 1]; break;               // right
+      case 38: case 40:                                    // up / down
+        var next = all[rowIndex + (e.keyCode === 38 ? -1 : 1)];
+        if (next && next.children.length) {
+          var x = current.getBoundingClientRect().left;
+          target = Array.prototype.slice.call(next.children).reduce(function (best, c) {
+            return Math.abs(c.getBoundingClientRect().left - x) <
+                   Math.abs(best.getBoundingClientRect().left - x) ? c : best;
+          });
+        }
+        break;
+      case 13: launch(current.dataset.id); break;          // OK
+      case 461: e.preventDefault(); break;                 // Back: stay on home
+    }
+    if (target) {
+      target.focus();
+      scrollRow(target.parentNode, target);
+      e.preventDefault();
+    }
+  });
+
+  function tick() {
+    var now = new Date();
+    var h = now.getHours();
+    document.getElementById("greeting").textContent =
+      h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+    document.getElementById("clock").textContent =
+      now.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    document.getElementById("date").textContent =
+      now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+  }
+
+  tick();
+  setInterval(tick, 10000);
+  loadApps();
+  document.addEventListener("webOSRelaunch", loadApps);
+</script>
+</body>
+</html>

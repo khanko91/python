@@ -84,12 +84,13 @@
 <div class="row" id="inputs"></div>
 
 <script>
-  // Used when the TV refuses to list launch points.
+  // Used when the TV refuses to list launch points (e.g. Developer Mode installs).
+  // Ids are the webOS app ids; confirm with `python -m lgtv.debloat --host <ip> apps`.
   var FALLBACK_APPS = [
     { id: "netflix", title: "Netflix" },
     { id: "youtube.leanback.v4", title: "YouTube" },
-    { id: "com.webos.app.livetv", title: "Live TV" },
-    { id: "com.webos.app.settings", title: "Settings" }
+    { id: "youtube.leanback.ytv.v1", title: "YouTube TV" },
+    { id: "amazon", title: "Prime Video" }
   ];
   var INPUTS = [
     { id: "com.webos.app.hdmi1", title: "HDMI 1" },

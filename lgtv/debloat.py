@@ -11,6 +11,7 @@ Removal is a dry run unless --yes is given.
 import argparse
 import asyncio
 import json
+import os
 import shlex
 import subprocess
 import sys
@@ -155,7 +156,13 @@ def cmd_autostart(args):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--host", required=True, help="TV IP address")
+    default_host = os.environ.get("LGTV_HOST")
+    parser.add_argument(
+        "--host",
+        default=default_host,
+        required=default_host is None,
+        help="TV IP address (default: $LGTV_HOST)",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     sub.add_parser("apps", help="list installed apps")

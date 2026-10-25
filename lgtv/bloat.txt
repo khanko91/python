@@ -1,16 +1,40 @@
-# Suggested removals. App ids vary by model, region and firmware, so run
-#   python lgtv/debloat.py --host <tv-ip> apps
-# first and edit this list to match what your TV actually has.
-# Delete any line for an app you use.
+# Removal list for a 55UT8000AUA on webOS 24, from `debloat.py apps`.
+# Delete any line for an app you use. Lines starting with # are ignored.
+#
+# Everything active below is a store app, not a [system] app, so it can also be
+# deleted on a stock TV: Home > Edit App List > select the app > Delete.
 
-com.webos.app.lgchannels        # LG Channels (ad-supported free TV)
-com.webos.app.sportsapp         # Sports Portal
-com.webos.app.gallery           # Gallery / art screensaver content
-com.webos.app.shoppingtv        # Shopping
-com.webos.app.facebookwatch
-amazon.alexa.view
-com.apple.appletv
-com.disney.disneyplus-prod
-com.rakuten.tv
-com.tubitv.app
-com.pluto.tv
+# LG promos and filler
+com.lgtravel.app                # LG Travel+
+com.lgtvod.us.app               # LG Movies & TV
+com.twin.app.gamingportal       # LG Gaming Portal
+epoxyaisports                   # LG Sports Playbook
+webos.day                       # LG Streaming Week
+shortcutcopilot                 # Copilot
+
+# Preinstalled games and kids apps
+com.blacknut.app                # Blacknut Cloud Gaming
+com.miniclip.eightballpool      # 8 Ball Pool
+com.volley.lgshell              # Weekend Games
+com.readingcorner.lgwebos       # The Reading Corner
+com.angel.tv2                   # Angel Studios
+
+# Sports apps
+com.mlbtv.app                   # MLB
+com.ncaa.mmlive.app             # NCAA March Madness Live
+
+# Streaming services you didn't list as ones you use. Remove the leading # to
+# delete them. They can be reinstalled from the Apps store at any time.
+# hulu                          # Hulu
+# com.disney.disneyplus-prod    # Disney+
+# com.peacock.tv                # Peacock
+# com.discovery.dplus           # discovery+
+# com.movenetworks.app.sling-tv-sling-production  # Sling TV
+# spotify-beehive               # Spotify
+
+# [system] apps: built into the firmware, cannot be uninstalled even with root.
+# Hide them from the Home bar instead (long-press OK on the tile > Hide).
+#   com.webos.app.lgchannels        LG Channels
+#   com.webos.app.lifeonscreen      LG Gallery+
+#   com.webos.app.sportsteamsettings Sports
+#   amazon.alexa.view               Amazon Alexa
